@@ -11,6 +11,7 @@ This repository is the public toolkit for builders:
 | [`sdk/qhooks.mjs`](sdk/qhooks.mjs) | The QHooks JavaScript SDK: one ES module, no dependencies, no build step. Read launches, pools, trades and holders; quote through a launch's hook; build swap transactions your users sign in their own wallets. The same file is served at `https://qhooks.com/sdk/qhooks.mjs`. |
 | [`docs/api.md`](docs/api.md) | The free public read API (`https://qhooks.com/api/v1`): endpoints, SDK functions, limits. |
 | [`docs/modules.md`](docs/modules.md) | How builder-marketplace modules work, what review checks, and how to submit one. |
+| [`contracts/`](contracts) | The module template (MIT): `QModuleBase` plus the staking and raffle reference modules, with checksums and build settings. |
 | [`examples/`](examples) | Small runnable examples. |
 | [`ROADMAP.md`](ROADMAP.md) | What we plan to build next. |
 
