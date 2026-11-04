@@ -11,7 +11,8 @@ Live version: <https://qhooks.com/roadmap.html>.
 - The first real launches on QHooks. ([page](https://qhooks.com/markets.html))
 
 ## Weeks 2–4 · First builders ship
-- The first bounties close: submissions reviewed and winners announced. ([page](https://qhooks.com/builders-program.html))
+- Builder payments start in week 3, then every month, so entries can stack up first. ([page](https://qhooks.com/builders-program.html))
+- The first bounties close and winners are announced.
 - The first modules from outside builders, reviewed and listed. ([page](https://qhooks.com/builders.html))
 - QHooks pools listed with aggregators.
 - Wider use of the public API and SDK. ([page](https://qhooks.com/api.html))
