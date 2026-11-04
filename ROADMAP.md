@@ -1,29 +1,32 @@
 # QHooks roadmap
 
-What we plan to build next for creators, traders, holders and builders. These are plans, not promises: priorities can
-change, and the [changelog](https://qhooks.com/changelog.html) records what actually ships. Live version:
-<https://qhooks.com/roadmap.html>.
+What we plan to build next for creators, traders, holders and builders over the next 12 months. These are plans, not
+promises: priorities can change, and the [changelog](https://qhooks.com/changelog.html) records what actually ships.
+Live version: <https://qhooks.com/roadmap.html>.
 
-## Months 0–1 · Launch (now)
-- The launch tools are live: qToken Studio, the terminal, the Lab and the builder marketplace.
-- The first real launches on QHooks.
+## Week 1 · Launch and build (now)
+- The launch tools are live: qToken Studio, the terminal, the Lab and the builder marketplace. ([page](https://qhooks.com/qtoken-studio.html))
+- Builders can start straight away: the module template, the Lab and the public API are open. ([page](https://qhooks.com/builders.html))
+- Builder bounties open: a community bot for launch groups and a loyalty staking module. ([page](https://qhooks.com/builders-program.html))
+- The first real launches on QHooks. ([page](https://qhooks.com/markets.html))
 
-## Months 1–3 · First builders
-- Builder bounties: a community bot for launch groups and a loyalty staking module.
-- The first listed modules in the builder marketplace.
+## Weeks 2–4 · First builders ship
+- The first bounties close: submissions reviewed and winners announced. ([page](https://qhooks.com/builders-program.html))
+- The first modules from outside builders, reviewed and listed. ([page](https://qhooks.com/builders.html))
 - QHooks pools listed with aggregators.
-- Wider use of the public API and SDK.
+- Wider use of the public API and SDK. ([page](https://qhooks.com/api.html))
 
-## Months 3–6 · Harden and widen
-- An independent security review of the contracts that hold users' funds.
-- More marketplace modules and Lab templates.
+## Months 2–3 · Harden and widen
+- An independent security review of the contracts that hold users’ funds.
+- The next round of bounties opens. ([page](https://qhooks.com/builders-program.html))
+- More marketplace modules and Lab templates. ([page](https://qhooks.com/lab.html))
 - Community rewards for early users.
 
-## Months 6–12 · Grow
-- Builder marketplace growth.
+## Months 4–6 · Grow
 - Launches on Solana.
 - Incentive programs for creators.
+- Builder marketplace growth.
 
-## Months 12–24 · Scale
-- A larger builder ecosystem around QHooks.
+## Months 6–12 · Scale
 - Listing curation by the community.
+- A larger builder ecosystem around QHooks.
