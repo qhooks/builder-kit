@@ -1,0 +1,9 @@
+{
+  "name": "qhooks-builder-kit",
+  "version": "1.0.0",
+  "description": "QHooks JavaScript SDK, public API docs and builder guides",
+  "type": "module",
+  "exports": "./sdk/qhooks.mjs",
+  "license": "MIT",
+  "homepage": "https://qhooks.com/api.html"
+}
