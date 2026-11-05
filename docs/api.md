@@ -32,7 +32,8 @@ const tx = q.universalRouterSwap({ pool, zeroForOne: buy, amountIn: 20_000000n, 
 | `/markets/{chainId}/{controller}/holders` | Top 25 holders and top 25 traders by volume. |
 | `/markets/{chainId}/{controller}/candles?tf=` | OHLCV candles; tf in seconds: 60, 300, 900, 3600, 14400 or 86400. |
 | `/pools?chain=` | Every initialised pool of every listed launch, with its full v4 PoolKey, hook kind and decoded permission flags, LP fee, protocol fee, current price, quoter and router profile. |
-| `/hooks/{chainId}/{hook}` | Any v4 hook address: whether code is deployed, its permission flags, and, for QHooks hooks, the pools that use it. |
+| `/hooks/{chainId}/{hook}` | Any v4 hook address: whether code is deployed, its permission flags, and, for QHooks hooks, the pools that use it. Also the live evidence, plain-language capabilities, shared code, project and Tape activity; see [discover.md](discover.md). |
+| `/hooks`, `/hooks/compare`, `/hooks/families/{fp}`, `/hooks/projects[/{id}]`, `/hooks/tape/*` | QHooks Discover: the hook board, comparisons, runtime families, the project registry and the Hook Tape. See [discover.md](discover.md). |
 | `/quote?chain=&pool=&zeroForOne=&amountIn=&trader=` | An exact-input quote for a listed pool, simulated on the V4Quoter with from = trader. Includes the LP fee, hook charges and protocol fee. A refused quote returns 422 with the hook’s reason. |
 | `/wallets/{address}` | A wallet’s positions across listed launches: balance, bought, sold, spent, received, price. |
 

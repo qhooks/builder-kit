@@ -10,6 +10,7 @@ This repository is the public toolkit for builders:
 |---|---|
 | [`sdk/qhooks.mjs`](sdk/qhooks.mjs) | The QHooks JavaScript SDK: one ES module, no dependencies, no build step. Read launches, pools, trades and holders; quote through a launch's hook; build swap transactions your users sign in their own wallets. The same file is served at `https://qhooks.com/sdk/qhooks.mjs`. |
 | [`docs/api.md`](docs/api.md) | The free public read API (`https://qhooks.com/api/v1`): endpoints, SDK functions, limits. |
+| [`docs/discover.md`](docs/discover.md) | QHooks Discover: every Uniswap v4 hook across chains with live evidence (permissions, code fingerprint, shared code, owner), the project registry, the Hook Tape on Base and Robinhood Chain, and hook alerts. |
 | [`docs/modules.md`](docs/modules.md) | How builder-marketplace modules work, what review checks, and how to submit one. |
 | [`contracts/`](contracts) | The module template (MIT): `QModuleBase` plus the staking and raffle reference modules, with checksums and build settings. |
 | [`examples/`](examples) | Small runnable examples. |
@@ -30,7 +31,7 @@ See [`examples/quote.mjs`](examples/quote.mjs) for a full quote-and-build-transa
 
 ## Links
 
-- Site: <https://qhooks.com> · Developers: <https://qhooks.com/api.html> · Builders: <https://qhooks.com/builders.html>
+- Site: <https://qhooks.com> · Discover: <https://qhooks.com/discover> · Developers: <https://qhooks.com/api.html> · Builders: <https://qhooks.com/builders.html>
 - Changelog: <https://qhooks.com/changelog.html> · Roadmap: <https://qhooks.com/roadmap.html>
 - Telegram: [@qhooks_bot](https://t.me/qhooks_bot) · X: [@qHooks_](https://x.com/qHooks_)
 
