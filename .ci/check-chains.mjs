@@ -1,0 +1,10 @@
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {LIVE} from './canonical-chains.mjs';
+const bytes=await readFile(new URL('./canonical-chains.mjs',import.meta.url));
+const pin=JSON.parse(await readFile(new URL('./canonical-source.json',import.meta.url)));
+if(createHash('sha256').update(bytes).digest('hex')!==pin.sha256)throw Error('Canonical registry snapshot differs from release pin');
+const ids=LIVE.map(c=>String(c.id)).sort();
+const {CHAINS}=await import('../sdk/qhooks.mjs');
+if(JSON.stringify(Object.keys(CHAINS).sort())!==JSON.stringify(ids))throw Error('SDK chains differ from canonical LIVE EVM registry');
+console.log(JSON.stringify({pass:true,evmChains:ids.length,sourceRelease:pin.releaseId,scope:'SDK EVM registry membership; Solana site flows are separate'}));
