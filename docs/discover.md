@@ -19,7 +19,7 @@ Fee attribution isn't measured. The swap fee in Tape rows is the LP fee the Pool
 | Endpoint | Returns |
 |---|---|
 | `/hooks?chain=&q=&permission=&project=&qhooks=1&new=1&family=&sort=swaps\|pools\|name&limit=&offset=` | The hook board: a page of hooks (limit ≤ 200), each with chain, address, name, counts, permission flags, plain-language `capabilities`, project, runtime family and its profile URL. `new=1` lists only the hooks the Tape found that the snapshot doesn't have. |
-| `/hooks/{chainId}/{address}` | One hook. It keeps the original fields (`deployed`, `flags`, `permissions`, `qhooks`, `kind`, `pools`) and adds `evidence` (block, code size, fingerprint, owner probe), `capabilities`, `family`, `board`, `project`, `tape`, `trade` (links into the QHooks terminal), `buildLike` (the closest QHooks Lab templates, launch blocks or modules), `trust` (QHooks launches only), and `measured` / `planned`. Live chains: 8453, 4663, 1, 42161, 56. |
+| `/hooks/{chainId}/{address}` | One hook. It keeps the original fields (`deployed`, `flags`, `permissions`, `qhooks`, `kind`, `pools`) and adds `evidence` (block, code size, fingerprint, owner probe), `capabilities`, `family`, `board`, `project`, `tape`, `trade` (links into the QHooks terminal), `buildLike` (the closest QHooks Lab templates, launch blocks or modules), `trust` (QHooks launches only), and `measured` / `planned`. EVM network configurations: 8453, 4663, 1, 42161, 56, 99901 (Elysium), 143 (Monad). Check the returned coverage and per-chain availability; Solana discovery is a separate terminal flow, not a v4 hook. |
 | `/hooks/compare?ids=<chainId>_<address>,…` | Two to four hooks side by side, with `shared` and `differs`. |
 | `/hooks/families/{fingerprint}` | Every deployment that shares one runtime. |
 | `/hooks/projects?category=` | The project registry. QHooks entries come first: the launch hook, Lab templates and marketplace modules. Each project lists its sources and deployments. |
@@ -37,10 +37,17 @@ Fee attribution isn't measured. The swap fee in Tape rows is the LP fee the Pool
 import { createClient } from 'https://qhooks.com/sdk/qhooks.mjs';
 
 const q = createClient();
-const board = await q.hooks.list({ chain: '8453', permission: 'beforeSwapReturnDelta', limit: 20 });
-const hook = await q.hooks.get('8453', board.hooks[0].address);
-console.log(hook.capabilities.map(c => c.title), hook.evidence.fingerprint);
-const tape = await q.hooks.tape.swaps({ chain: '4663', hook: hook.hook, limit: 10 });
+const chain = '8453';
+const board = await q.hooks.list({ chain, permission: 'beforeSwapReturnDelta', limit: 20 });
+const first = board.hooks[0];
+if (!first) {
+  console.log('No matching hooks in this snapshot.');
+} else {
+  const hook = await q.hooks.get(chain, first.address);
+  console.log(hook.capabilities.map(c => c.title), hook.evidence.fingerprint);
+  const tape = await q.hooks.tape.swaps({ chain, hook: hook.hook, limit: 10 });
+  console.log(tape);
+}
 ```
 
 ## Alerts

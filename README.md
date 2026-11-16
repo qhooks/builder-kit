@@ -8,7 +8,7 @@ This repository is the public toolkit for builders:
 
 | Path | What it is |
 |---|---|
-| [`sdk/qhooks.mjs`](sdk/qhooks.mjs) | The QHooks JavaScript SDK: one ES module, no dependencies, no build step. Read launches, pools, trades and holders; quote through a launch's hook; build swap transactions your users sign in their own wallets. The same file is served at `https://qhooks.com/sdk/qhooks.mjs`. |
+| [`sdk/qhooks.mjs`](sdk/qhooks.mjs) | The QHooks JavaScript SDK: one ES module, no dependencies, no build step. Read launches, pools, trades and holders; quote through a launch's hook; build swap transactions your users sign in their own wallets. Release source for `https://qhooks.com/sdk/qhooks.mjs`; compare the SDK version and checksum with the site release before integration. |
 | [`docs/api.md`](docs/api.md) | The free public read API (`https://qhooks.com/api/v1`): endpoints, SDK functions, limits. |
 | [`docs/discover.md`](docs/discover.md) | QHooks Discover: every Uniswap v4 hook across chains with live evidence (permissions, code fingerprint, shared code, owner), the project registry, the Hook Tape on Base and Robinhood Chain, and hook alerts. |
 | [`docs/modules.md`](docs/modules.md) | How builder-marketplace modules work, what review checks, and how to submit one. |
@@ -38,3 +38,9 @@ See [`examples/quote.mjs`](examples/quote.mjs) for a full quote-and-build-transa
 ## License
 
 MIT, see [LICENSE](LICENSE). The QHooks name and logo are not covered by the license.
+
+## SDK release checks
+
+SDK and package version: 1.2.1. Run `npm test` without network access. The site release is owned separately; the 1.2.1 site candidate and this repository use byte-identical SDK source. Confirm the deployed version/checksum after that release rather than assuming main has already been deployed.
+
+The standalone SDK includes an MIT-licensed noble Keccak-256 implementation for CREATE2 address checks. Its editable inputs/license are in `scripts/vendor/hashes`; `scripts/build-sdk-hash.mjs` regenerates only that embedded section with an existing esbuild installation. No runtime import or npm dependency is required.

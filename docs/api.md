@@ -13,12 +13,18 @@ curl https://qhooks.com/api/v1/pools?chain=8453
 ```
 import { createClient, withSlippage } from 'https://qhooks.com/sdk/qhooks.mjs';
 
+const trader = '0x0000000000000000000000000000000000000001'; // public signing-wallet address
 const q = createClient({ rpc: { '8453': 'https://mainnet.base.org' } });
 const [pool] = await q.pools({ chain: '8453' });
-const buy = pool.key.currency0 === pool.quote.address;          // quote token → launch token
-const { amountOut } = await q.quote({ pool, zeroForOne: buy, amountIn: 20_000000n, trader: me });
-const tx = q.universalRouterSwap({ pool, zeroForOne: buy, amountIn: 20_000000n, minOut: withSlippage(amountOut, 100) });
-// send tx ({ to, data, value }) from the user's wallet after the Permit2 approvals
+if (!pool) {
+  console.log('No listed pools on Base yet.');
+} else {
+  const buy = pool.key.currency0.toLowerCase() === pool.quote.address.toLowerCase();
+  const amountIn = 10n ** BigInt(pool.quote.decimals) / 1000n; // 0.001 of this pool's quote asset
+  const { amountOut } = await q.quote({ pool, zeroForOne: buy, amountIn, trader });
+  const tx = q.universalRouterSwap({ pool, zeroForOne: buy, amountIn, minOut: withSlippage(amountOut, 100) });
+  console.log(tx); // unsigned; the signing wallet reviews it and any Permit2 approvals
+}
 ```
 
 ## Endpoints
@@ -58,17 +64,17 @@ QHooks launches trade on ordinary Uniswap v4 pools. Any v4 router can reach them
 
 ### The launch hook
 
-Kind qhooks-launch-blocks, permission flags 10956: beforeInitialize, beforeAddLiquidity, beforeRemoveLiquidity, beforeSwap, afterSwap, beforeSwapReturnDelta, afterSwapReturnDelta. Liquidity belongs to the launch; outside liquidity is not accepted. The hook is not upgradeable.
+The current simple-launch family is `qhooks-simple-launch`, permission flags `8396`: beforeInitialize, beforeSwap, afterSwap, beforeSwapReturnDelta and afterSwapReturnDelta. Read each returned pool’s `kind`, flags, permissions and router profile; older `qhooks-launch-blocks` launches and Lab hooks have their own rules. A hook permission flag describes a callback, not a safety guarantee.
 
 - Charges come through return deltas. A launch’s taxes and other charges, plus a protocol fee (one fifth of the creator’s LP fee), are taken inside the swap. Off-chain constant-product math is not enough: quote with the V4Quoter or a full simulation. The /quote endpoint and the SDK do this.
 
-- Launch windows. In a launch’s first minutes, its rules can refuse a swap: a per-block buy cap, a per-wallet cooldown and wallet cap, a holder gate, an opening bell or an opening auction. router.routable is false until router.routableFrom, and the notes name each rule and when it ends.
+- Launch windows on supported hook families. A configured launch rule can refuse a swap: a per-block buy cap, a per-wallet cooldown and wallet cap, a holder gate, an opening bell or an opening auction. router.routable is false until router.routableFrom, and the notes name each rule and when it ends.
 
 - Per-wallet rules use tx.origin. When an EOA sends the swap, the rules apply to that wallet even through a router. Through relayers, solvers or ERC-4337 bundlers, they apply to the relayer. Simulate with from set to the trader. Launches with an exit clock (router.quoteWithTrader) charge sells by how recently that wallet bought.
 
-- Price-path charges. Sandwich, impact and storm charges depend on the price before and after the swap within the block (router.dynamicFee).
+- Optional price-path charges on supported hooks. Sandwich, impact and storm charges depend on the price before and after the swap within the block (router.dynamicFee).
 
-- Hook data. Empty hook data is fine. Launches with referrals accept a 32-byte referrer address.
+- Hook data depends on the hook family. Use the router profile and supported quote path; do not assume every hook accepts the same payload.
 
 - Indexers. v4’s Swap event is emitted before the hook’s afterSwap, so event-only indexers see prices and volumes without the hook charges.
 
@@ -88,6 +94,12 @@ Hooks deployed from the Lab each get a share page whose link carries a qhooks-ho
 
 - There are no webhooks yet; poll /markets or use the Telegram bot for alerts.
 
-- Hook inspections (inspector) are read-only, and paid inspection is switched off.
+- Stored QProof results remain free through the agent tools. Fresh on-request QProof scans use the separate paid x402 endpoint; they are not part of this read-only SDK example.
 
-- Contracts are not independently audited. Nothing here is investment advice.
+- Independent security review underway with [HEY Research Lab](https://x.com/qHooks_/status/2122407006250103111). This is not a completed audit claim.
+
+## Network coverage and router setup
+
+The public terminal covers Robinhood Chain, Base, Ethereum, Arbitrum, BNB Chain, Elysium, Monad and Solana. This EVM SDK has seven EVM configurations (`4663`, `8453`, `1`, `42161`, `56`, `99901`, `143`); Solana uses its separate site/API flow, not EVM calldata. The `/chains` response and each product's availability remain authoritative. Elysium uses its own fee-router address; Monad's fee-router flow is unavailable in this SDK, while its v4 configuration is retained for supported reads/direct routing.
+
+`feeRouterStatus()` returns setup bytes only after checking the standard CREATE2 deployer and recomputing the pinned fee-router address from salt and init code. It refuses unknown or mismatched setup metadata. It never deploys anything. A chain with a separate router build has no automatic setup fallback. `feeRouterSwap()` accepts an integer feeBps from 0 to 100 (the contract cap); a chainId override must match the pool's declared chain.

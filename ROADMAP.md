@@ -4,6 +4,10 @@ What we plan to build next for creators, traders, holders and builders over the 
 promises: priorities can change, and the [changelog](https://qhooks.com/changelog.html) records what actually ships.
 Live version: <https://qhooks.com/roadmap.html>.
 
+## Live coverage
+
+The terminal covers Robinhood Chain, Base, Ethereum, Arbitrum, BNB Chain, Elysium, Monad and Solana. Product and router availability varies; use the current chain configuration and supported wallet review flow.
+
 ## Week 1 · Launch and build (now)
 - The launch tools are live: qToken Studio, the terminal, the Lab and the builder marketplace. ([page](https://qhooks.com/qtoken-studio.html))
 - Builders can start straight away: the module template, the Lab and the public API are open. ([page](https://qhooks.com/builders.html))
@@ -24,7 +28,7 @@ Live version: <https://qhooks.com/roadmap.html>.
 - Community rewards for early users.
 
 ## Months 4–6 · Grow
-- Launches on Solana.
+- Further Solana integrations; the existing Solana launch flow is already live.
 - Incentive programs for creators.
 - Builder marketplace growth.
 
