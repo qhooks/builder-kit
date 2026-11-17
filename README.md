@@ -18,6 +18,10 @@ This repository is the public toolkit for builders:
 
 The SDK never holds keys or sends transactions. It returns `{ to, data, value }` for the user's wallet to review and send.
 
+## Reference modules
+
+`QRafflePot` uses blockhash randomness. Block producers or sequencers can predict or influence the result, so keep pots small. VRF is planned for a future version. See [`contracts/README.md`](contracts/README.md) for module behavior and tests.
+
 ## Quick start
 
 ```js
