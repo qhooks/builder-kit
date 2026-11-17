@@ -8,13 +8,20 @@ import {QModuleBase} from "./QModuleBase.sol";
 /// pot. Holders enter a daily round by depositing the token; tickets are tokens x seconds left in the round, so
 /// entering at the last minute buys almost nothing. After a round ends anyone draws it: the first call picks a draw
 /// block a few blocks ahead, the next call after that block uses its hash to pick one winner, weighted by tickets,
-/// who wins the whole pot in the token and the pair currency. Every depositor takes their tokens back once the round
-/// has ended, winner or not. Rounds nobody entered are skipped; their income waits for the next draw.
-/// Randomness comes from a future block hash: good enough for a small pot, but the chain's block producer could
-/// influence it, so pots are not meant to be large. No owner.
+/// who wins the pot (less a small bounty for whoever completes the draw) in the token and the pair currency. Every
+/// depositor takes their tokens back once the round has ended, winner or not. Rounds nobody entered are skipped; their
+/// income waits for the next draw.
+/// A draw block's hash is only readable for 256 blocks. If nobody completes the draw in that window the round closes
+/// with no winner and its pot carries over to the next entered round: an armed round is never re-armed, so a loser who
+/// has already seen the losing hash cannot roll again. The bounty pays anyone to complete draws on time.
+/// Randomness comes from a future block hash: good enough for a small pot, but the chain's block producer (on Arbitrum
+/// Orbit chains, the sequencer) could predict or influence it, so pots are not meant to be large; use VRF for more.
+/// No owner.
 contract QRafflePot is QModuleBase {
     uint256 public constant ROUND = 1 days;
     uint256 public constant DRAW_DELAY = 2; // blocks between arming a draw and drawing it
+    /// @notice Share of the pot paid to whoever completes a draw, in basis points: 1%.
+    uint256 public constant DRAW_BOUNTY_BPS = 100;
 
     uint256 public immutable start;
 
@@ -45,6 +52,9 @@ contract QRafflePot is QModuleBase {
     event Withdrawn(uint256 indexed round, address indexed who, uint256 amount);
     event Armed(uint256 indexed round, uint256 drawBlock);
     event Drawn(uint256 indexed round, address indexed winner, uint256 tokenPrize, uint256 quotePrize);
+    event Bounty(uint256 indexed round, address indexed drawer, uint256 tokenAmount, uint256 quoteAmount);
+    /// @notice Nobody drew round `round` while its draw block's hash was readable: no winner, the pot carries over.
+    event Expired(uint256 indexed round);
     event Claimed(address indexed who, uint256 tokenAmount, uint256 quoteAmount);
 
     constructor(address token_, address quote_, address builder_, uint16 builderBps_)
@@ -96,36 +106,51 @@ contract QRafflePot is QModuleBase {
     }
 
     /// @notice Draws the next ended round with entries. The first call arms it (picks a draw block DRAW_DELAY
-    /// blocks ahead); a call after that block draws. If the draw block is too old for its hash, it re-arms.
+    /// blocks ahead); a call after that block draws, and the caller earns DRAW_BOUNTY_BPS of the pot. If the draw block
+    /// is too old for its hash, the round closes with no winner and its pot carries over; it is never re-armed.
     /// Returns true when a winner was drawn.
     function draw() external guarded returns (bool) {
         require(drawIndex < entered.length, "QRaffle: nothing to draw");
         uint256 r = entered[drawIndex];
         require(r < currentRound(), "QRaffle: round open");
         Round storage rd = rounds[r];
-        if (rd.drawBlock == 0 || (block.number > rd.drawBlock && blockhash(rd.drawBlock) == 0)) {
+        if (rd.drawBlock == 0) {
             rd.drawBlock = uint64(block.number + DRAW_DELAY);
             emit Armed(r, rd.drawBlock);
             return false;
         }
         require(block.number > rd.drawBlock, "QRaffle: too early");
+        bytes32 h = blockhash(rd.drawBlock);
+        if (h == 0) {
+            rd.drawn = true; // winner stays address(0); deposits come back through withdraw as usual
+            drawIndex++;
+            emit Expired(r);
+            return false;
+        }
         _syncAll();
-        uint256 seed = uint256(keccak256(abi.encode(blockhash(rd.drawBlock), r, address(this))));
+        uint256 seed = uint256(keccak256(abi.encode(h, r, address(this))));
         address w = _pick(r, seed % rd.weight);
         uint256 pt = pot[0];
         uint256 pq = pot[1];
         pot[0] = 0;
         pot[1] = 0;
+        uint256 bt = pt * DRAW_BOUNTY_BPS / BPS;
+        uint256 bq = pq * DRAW_BOUNTY_BPS / BPS;
+        pt -= bt;
+        pq -= bq;
         _won[w][0] += pt;
         _won[w][1] += pq;
-        _prizesOwed[0] += pt;
-        _prizesOwed[1] += pq;
+        _won[msg.sender][0] += bt;
+        _won[msg.sender][1] += bq;
+        _prizesOwed[0] += pt + bt;
+        _prizesOwed[1] += pq + bq;
         rd.drawn = true;
         rd.winner = w;
         rd.prizeToken = pt;
         rd.prizeQuote = pq;
         drawIndex++;
         emit Drawn(r, w, pt, pq);
+        if (bt != 0 || bq != 0) emit Bounty(r, msg.sender, bt, bq);
         return true;
     }
 
@@ -153,11 +178,15 @@ contract QRafflePot is QModuleBase {
         return (_won[who][0], _won[who][1]);
     }
 
-    /// @notice The pot the next draw pays, counting income that has arrived but not been counted yet.
+    /// @notice The pot the next draw pays its winner (after the drawer's bounty), counting income that has arrived
+    /// but not been counted yet.
     function nextPrize() external view returns (uint256 tokenAmount, uint256 quoteAmount) {
         (uint256 t,) = _peek(0);
         (uint256 q,) = _peek(1);
-        return (pot[0] + t - t * builderBps / BPS, pot[1] + q - q * builderBps / BPS);
+        tokenAmount = pot[0] + t - t * builderBps / BPS;
+        quoteAmount = pot[1] + q - q * builderBps / BPS;
+        tokenAmount -= tokenAmount * DRAW_BOUNTY_BPS / BPS;
+        quoteAmount -= quoteAmount * DRAW_BOUNTY_BPS / BPS;
     }
 
     /// @notice Entries in round `r`.
