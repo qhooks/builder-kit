@@ -113,9 +113,11 @@ contract FixedStake is Test {
     // Anti-JIT kept: income streams over at least DURATION, so one block around a payout earns ~nothing.
     function test_justInTimeStakerEarnsAlmostNothing() public {
         _stake(alice, 1000e18);
-        vm.warp(_now() + 5 hours + 59 minutes); // just before an epoch boundary: the shortest window (DURATION + 1 min)
+        vm.warp((_now() / m.EPOCH() + 1) * m.EPOCH() - 1 minutes); // one minute before the next epoch boundary
         _stake(bob, 1000e18);
         _pay(1000e18);
+        (, uint64 finish,,) = m.stream(1);
+        assertEq(uint256(finish) - _now(), 1 days + 1 minutes, "exercise the shortest stream window");
         vm.warp(_now() + 12);
         vm.prank(bob);
         m.exit();
